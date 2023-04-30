@@ -9,7 +9,23 @@ const vAxis = ['1', '2', '3', '4', '5', '6', '7', '8'];
 interface Piece {
     image: string,
     x: number,
-    y: number
+    y: number,
+    type: PieceType,
+    team: TeamType
+}
+
+export enum TeamType {
+    WHITE,
+    BLACK
+}
+
+export enum PieceType {
+    PAWN,
+    ROOK,
+    KNIGHT,
+    BISHOP,
+    QUEEN,
+    KING
 }
 
 // const pieces: Piece[] = [];
@@ -18,29 +34,32 @@ interface Piece {
 // const chessboardRef = useRef(null);
 
 const initialBoardState: Piece[] = [];
-initialBoardState.push({image: 'assets/images/rook_b.png', x: 0, y: 7});
-initialBoardState.push({image: 'assets/images/knight_b.png', x: 1, y: 7});
-initialBoardState.push({image: 'assets/images/bishop_b.png', x: 2, y: 7});
-initialBoardState.push({image: 'assets/images/queen_b.png', x: 3, y: 7});
-initialBoardState.push({image: 'assets/images/king_b.png', x: 4, y: 7});
-initialBoardState.push({image: 'assets/images/bishop_b.png', x: 5, y: 7});
-initialBoardState.push({image: 'assets/images/knight_b.png', x: 6, y: 7});
-initialBoardState.push({image: 'assets/images/rook_b.png', x: 7, y: 7});
+
+for (let i = 0; i < 2; i++) {
+    const team = i === 0 ? TeamType.BLACK : TeamType.WHITE;
+    const type = i === 0 ? "b" : "w";
+    const y = i === 0 ? 7 : 0;
+
+    initialBoardState.push({image: `assets/images/rook_${type}.png`, x: 0, y: y, type: PieceType.ROOK, team: team});
+    initialBoardState.push({image: `assets/images/knight_${type}.png`, x: 1, y: y, type: PieceType.KNIGHT, team: team});
+    initialBoardState.push({image: `assets/images/bishop_${type}.png`, x: 2, y: y, type: PieceType.BISHOP, team: team});
+    initialBoardState.push({image: `assets/images/queen_${type}.png`, x: 3, y: y, type: PieceType.QUEEN, team: team});
+    initialBoardState.push({image: `assets/images/king_${type}.png`, x: 4, y: y, type: PieceType.KING, team: team});
+    initialBoardState.push({image: `assets/images/bishop_${type}.png`, x: 5, y: y, type: PieceType.BISHOP, team: team});
+    initialBoardState.push({image: `assets/images/knight_${type}.png`, x: 6, y: y, type: PieceType.KNIGHT, team: team});
+    initialBoardState.push({image: `assets/images/rook_${type}.png`, x: 7, y: y, type: PieceType.ROOK, team: team});
+}
+
+
+
 for (let i = 0; i < 8; i++) {
-    initialBoardState.push({image: 'assets/images/pawn_b.png', x: i, y: 6});
+    initialBoardState.push({image: 'assets/images/pawn_b.png', x: i, y: 6, type: PieceType.PAWN, team: TeamType.BLACK});
 }
 
 for (let i = 0; i < 8; i++) {
-    initialBoardState.push({image: 'assets/images/pawn_w.png', x: i, y: 1});
+    initialBoardState.push({image: 'assets/images/pawn_w.png', x: i, y: 1, type: PieceType.PAWN, team: TeamType.WHITE});
 }
-initialBoardState.push({image: 'assets/images/rook_w.png', x: 0, y: 0});
-initialBoardState.push({image: 'assets/images/knight_w.png', x: 1, y: 0});
-initialBoardState.push({image: 'assets/images/bishop_w.png', x: 2, y: 0});
-initialBoardState.push({image: 'assets/images/queen_w.png', x: 3, y: 0});
-initialBoardState.push({image: 'assets/images/king_w.png', x: 4, y: 0});
-initialBoardState.push({image: 'assets/images/bishop_w.png', x: 5, y: 0});
-initialBoardState.push({image: 'assets/images/knight_w.png', x: 6, y: 0});
-initialBoardState.push({image: 'assets/images/rook_w.png', x: 7, y: 0});
+
 
 export default function Chessboard() {
     const [gridX, setGridX] = useState(0);
@@ -131,12 +150,23 @@ export default function Chessboard() {
                 Math.ceil((e.clientY - chessboard.offsetTop - 800) / 100)
               );
             console.log(gridX, gridY);
-            referee.isValidMove();
+            
             setPieces((value) => {
                 const newPieces = value.map(p => {
                     if (p.x === gridX && p.y === gridY) {
-                        p.x = x;
-                        p.y = y;
+                        if (referee.isValidMove(gridX, gridY, x, y, p.type, p.team)) {
+                            p.x = x;
+                            p.y = y;
+                        }
+                        else {
+                            p.x = gridX;
+                            p.y = gridY;
+                            // activePiece!.style.left = `${gridX * 100}px`;
+                            // activePiece!.style.top = `${gridY * 100}px`;
+                            activePiece.style.removeProperty('position');
+                            activePiece.style.removeProperty('left');
+                            activePiece.style.removeProperty('top');
+                        }
                     }
                     return p;
                 });
