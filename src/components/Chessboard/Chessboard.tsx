@@ -6,7 +6,7 @@ import Referee from "../../referee/Referee";
 const hAxis = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 const vAxis = ['1', '2', '3', '4', '5', '6', '7', '8'];
 
-interface Piece {
+export interface Piece {
     image: string,
     x: number,
     y: number,
@@ -150,36 +150,36 @@ export default function Chessboard() {
                 Math.ceil((e.clientY - chessboard.offsetTop - 800) / 100)
               );
             console.log(gridX, gridY);
-            
-            setPieces((value) => {
-                const newPieces = value.map(p => {
-                    if (p.x === gridX && p.y === gridY) {
-                        if (referee.isValidMove(gridX, gridY, x, y, p.type, p.team)) {
-                            p.x = x;
-                            p.y = y;
+
+            const currentPiece = pieces.find(p => p.x === gridX && p.y === gridY);
+            const attackedPiece = pieces.find(p => p.x === x && p.y === y);
+            const validMove = referee.isValidMove(gridX, gridY, x, y, currentPiece!.type, currentPiece!.team, pieces);
+            if (currentPiece) {
+                const validMove = referee.isValidMove(gridX, gridY, x, y, currentPiece!.type, currentPiece!.team, pieces);
+                const isEnPassant = referee.isEnPassant(x, y,currentPiece!.type, currentPiece!.team, pieces);
+                if (validMove) {
+                    const newPieces = pieces.reduce((results, piece) => {
+                        if (piece.x === gridX && piece.y === gridY) {
+                            piece.x = x;
+                            piece.y = y;
+                            results.push(piece);
                         }
-                        else {
-                            p.x = gridX;
-                            p.y = gridY;
-                            // activePiece!.style.left = `${gridX * 100}px`;
-                            // activePiece!.style.top = `${gridY * 100}px`;
-                            activePiece.style.removeProperty('position');
-                            activePiece.style.removeProperty('left');
-                            activePiece.style.removeProperty('top');
+                        else if (!(piece.x === x && piece.y === y)) {
+                            results.push(piece);
                         }
-                    }
-                    return p;
-                });
-                
-                return newPieces;
-            })
+                        return results;
+                    }, [] as Piece[]);
+
+                    setPieces(newPieces);
+                }
+                else {
+                    activePiece.style.removeProperty('position');
+                    activePiece.style.removeProperty('left');
+                    activePiece.style.removeProperty('top');
+                }  
+            }
+
             setActivePiece(null);
-            // activePiece.style.position = 'static';
-            // const x = e.clientX - 50;
-            // const y = e.clientY - 50;
-            // activePiece.style.left = `${x}px`;
-            // activePiece.style.top = `${y}px`;
-            
         }
     }
 
