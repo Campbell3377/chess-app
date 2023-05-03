@@ -21,13 +21,20 @@ export default class Referee {
         return false;
     }
 
-    isEnPassant(x: number, y: number, type:PieceType, team: TeamType, boardState: Piece[]): boolean {
+    isEnPassant(px:number, py:number, x: number, y: number, type:PieceType, team: TeamType, boardState: Piece[]): boolean {
         const direction = team === TeamType.WHITE ? 1 : -1;
-        const piece = boardState.find((piece) => piece.x === x && piece.y === y-direction);
+        const passantRow = team === TeamType.WHITE ? 5 : 2;
+        const piece = boardState.find((piece) => piece.x === x && piece.y === y-direction && piece.enPassant);
 
-        if (piece && piece.type === PieceType.PAWN && piece.team !== team) {
-            console.log("Referee: isEnPassant - true")
-            return true;
+        if (type === PieceType.PAWN) {
+            if ((x-px === 1 || x-px === -1) && y-py === direction && y === passantRow) {
+                const piece = boardState.find((piece) => piece.x === x && piece.y === y-direction && piece.enPassant);
+                if (piece) {
+                    console.log("Referee: isEnPassant - true")
+                    return true;
+                }
+            }
+
         }
         console.log("Referee: isEnPassant - false")
         return false;
@@ -71,7 +78,7 @@ export default class Referee {
         const startingRow = team === TeamType.WHITE ? 1 : 6;
         const direction = team === TeamType.WHITE ? 1 : -1;
 
-        // Check if pawn is moving forward
+        // Check if pawn is moving forward two spaces
         if (px === x && py === startingRow && y === py + 2 * direction) {
             if (!this.tileIsOccupied(x, y, boardState) && !this.tileIsOccupied(x, y-direction, boardState)) {
                 return true;
@@ -81,7 +88,7 @@ export default class Referee {
                     return true;
                 }
             }
-        }
+        } // Check if pawn is moving forward one space
         else if (px === x && y === py + direction) {
             if (!this.tileIsOccupied(x, y, boardState)) {
                 return true;
@@ -93,10 +100,10 @@ export default class Referee {
                 console.log("Referee: isValidMove - true")
                 return true;
             }
-            else if (this.isEnPassant(x, y, PieceType.PAWN, team, boardState)) {
-                console.log("Referee: isValidMove - true")
-                return true;
-            }
+            // else if (this.isEnPassant(x, y, PieceType.PAWN, team, boardState)) {
+            //     console.log("Referee: isValidMove - true")
+            //     return true;
+            // }
         }
         return false;
     }
