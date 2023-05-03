@@ -1,19 +1,19 @@
-import { PieceType, TeamType, Piece } from "../components/Chessboard/Chessboard";
+import { PieceType, TeamType, Piece, Position, samePosition } from "../Constants";
 
 export default class Referee {
-    tileIsOccupied(x: number, y: number, boardState: Piece[]): boolean {
+    tileIsOccupied(p: Position, boardState: Piece[]): boolean {
         
-        if (boardState.some((piece) => piece.x === x && piece.y === y)) {
-            console.log("Referee: tileIsOccupied - true")
+        if (boardState.some((piece) => samePosition(piece.position, p))) {
+            // console.log("Referee: tileIsOccupied - true")
             return true;
         }
-        console.log("Referee: tileIsOccupied - false")
+        // console.log("Referee: tileIsOccupied - false")
         return false;
     }
 
-    tileIsOccupiedByOpponent(x: number, y: number, team: TeamType, boardState: Piece[]): boolean {
+    tileIsOccupiedByOpponent(p:Position, team: TeamType, boardState: Piece[]): boolean {
         
-        if (boardState.some((piece) => piece.x === x && piece.y === y && piece.team !== team)) {
+        if (boardState.some((piece) => piece.position.x === p.x && piece.position.y === p.y && piece.team !== team)) {
             console.log("Referee: tileIsOccupiedByOpponent - true")
             return true;
         }
@@ -21,82 +21,177 @@ export default class Referee {
         return false;
     }
 
-    isEnPassant(px:number, py:number, x: number, y: number, type:PieceType, team: TeamType, boardState: Piece[]): boolean {
+    isEnPassant(grabPos: Position, p: Position, type:PieceType, team: TeamType, boardState: Piece[]): boolean {
         const direction = team === TeamType.WHITE ? 1 : -1;
         const passantRow = team === TeamType.WHITE ? 5 : 2;
-        const piece = boardState.find((piece) => piece.x === x && piece.y === y-direction && piece.enPassant);
+        const piece = boardState.find((piece) => piece.position.x === p.x && piece.position.y === p.y-direction && piece.enPassant);
 
         if (type === PieceType.PAWN) {
-            if ((x-px === 1 || x-px === -1) && y-py === direction && y === passantRow) {
-                const piece = boardState.find((piece) => piece.x === x && piece.y === y-direction && piece.enPassant);
+            if ((p.x-grabPos.x === 1 || p.x-grabPos.x === -1) && p.y-grabPos.y === direction && p.y === passantRow) {
+                const piece = boardState.find((piece) => piece.position.x === p.x && piece.position.y === p.y-direction && piece.enPassant);
                 if (piece) {
-                    console.log("Referee: isEnPassant - true")
+                    // console.log("Referee: isEnPassant - true")
                     return true;
                 }
             }
 
         }
-        console.log("Referee: isEnPassant - false")
+        // console.log("Referee: isEnPassant - false")
         return false;
     }
 
-    isValidMove(px: number, py: number, x: number, y: number, type: PieceType, team: TeamType, boardState: Piece[]): boolean{
+    isValidMove(grabPos: Position, p: Position, type: PieceType, team: TeamType, boardState: Piece[]): boolean{
         
         switch(type){
             case PieceType.PAWN:
-                return this.isValidPawnMove(px, py, x, y, team, boardState);
+                return this.isValidPawnMove(grabPos, p, team, boardState);
             case PieceType.ROOK:
-                return this.isValidRookMove(px, py, x, y);
+                return this.isValidRookMove(grabPos, p, team, boardState);
             case PieceType.KNIGHT:
-                return this.isValidKnightMove(px, py, x, y);
+                return this.isValidKnightMove(grabPos, p, team, boardState);
             case PieceType.BISHOP:
-                return this.isValidBishopMove(px, py, x, y);
+                return this.isValidBishopMove(grabPos, p, team, boardState);
             case PieceType.QUEEN:
-                return this.isValidQueenMove(px, py, x, y);
+                return this.isValidQueenMove(grabPos, p);
             case PieceType.KING:
-                return this.isValidKingMove(px, py, x, y);
+                return this.isValidKingMove(grabPos, p);
             default:
         }
         return true;
     }
-    isValidKingMove(px: number, py: number, x: number, y: number) {
+    isValidKingMove(grabPos: Position, p: Position) {
         return true;
     }
-    isValidQueenMove(px: number, py: number, x: number, y: number) {
+    isValidQueenMove(grabPos: Position, p: Position) {
         return true;
     }
-    isValidBishopMove(px: number, py: number, x: number, y: number) {
+    isValidBishopMove(grabPos: Position, p: Position, team: TeamType, boardState: Piece[]) {
+        // Check if bishop is moving diagonally
+        if (Math.abs(grabPos.x - p.x) === Math.abs(grabPos.y - p.y)) {
+            // Check if bishop is moving up and to the right
+            // console.log('checking if bishop is moving up and to the right');
+            // console.log( grabPos, p);
+            if (grabPos.x < p.x && grabPos.y < p.y) {
+                for (let i = 1; i < Math.abs(grabPos.x - p.x)+1; i++) {
+                    // console.log(p, {x: grabPos.x + i, y: grabPos.y + i})
+                    if (this.tileIsOccupied({x: grabPos.x + i, y: grabPos.y + i}, boardState)) {
+                        //check if bishop is capturing
+                        
+                        if( this.tileIsOccupiedByOpponent({x: grabPos.x + i, y: grabPos.y + i}, team, boardState)) {
+                            // console.log('capturing')
+                            return true;
+                            
+                        }
+                        else {
+                            // console.log('blocked')
+                            return false;
+                        }
+                    }
+                }
+                // return true;
+            }
+            // Check if bishop is moving up and to the left
+            else if (grabPos.x > p.x && grabPos.y < p.y) {
+                for (let i = 1; i < Math.abs(grabPos.x - p.x)+1; i++) {
+                    if (this.tileIsOccupied({x: grabPos.x - i, y: grabPos.y + i}, boardState)) {
+                        //check if bishop is capturing
+                        console.log('checking if bishop is capturing')
+                        if( this.tileIsOccupiedByOpponent({x: grabPos.x - i, y: grabPos.y + i}, team, boardState)) {
+                            console.log('capturing')
+                            return true;
+                            
+                        }
+                        else {
+                            console.log('blocked')
+                            return false;
+                        }
+                    }
+                }
+            }
+            // Check if bishop is moving down and to the right
+            else if (grabPos.x < p.x && grabPos.y > p.y) {
+                for (let i = 1; i < Math.abs(grabPos.x - p.x)+1; i++) {
+                    if (this.tileIsOccupied({x: grabPos.x + i, y: grabPos.y - i}, boardState)) {
+                        //check if bishop is capturing
+                        console.log('checking if bishop is capturing')
+                        if( this.tileIsOccupiedByOpponent({x: grabPos.x + i, y: grabPos.y - i}, team, boardState)) {
+                            console.log('capturing')
+                            return true;
+                            
+                        }
+                        else {
+                            console.log('blocked')
+                            return false;
+                        }
+                    }
+                }
+                // return true;
+            }
+            // Check if bishop is moving down and to the left
+            else if (grabPos.x > p.x && grabPos.y > p.y) {
+                for (let i = 1; i < Math.abs(grabPos.x - p.x)+1; i++) {
+                    if (this.tileIsOccupied({x: grabPos.x - i, y: grabPos.y - i}, boardState)) {
+                        //check if bishop is capturing
+                        console.log('checking if bishop is capturing')
+                        if( this.tileIsOccupiedByOpponent({x: grabPos.x - i, y: grabPos.y - i}, team, boardState)) {
+                            console.log('capturing')
+                            return true;
+                            
+                        }
+                        else {
+                            console.log('blocked')
+                            return false;
+                        }
+                    }
+                }
+                // return true;
+            }
+            return true;
+        }
+        return false;
+    }
+    isValidKnightMove(grabPos: Position, p: Position, team: TeamType, boardState: Piece[]) {
+        // Check if knight is moving in an L shape
+        if ((Math.abs(grabPos.x - p.x) === 2 && Math.abs(grabPos.y - p.y) === 1) || (Math.abs(grabPos.x - p.x) === 1 && Math.abs(grabPos.y - p.y) === 2)) {
+            // Check if tile is occupied by opponent
+            if (this.tileIsOccupiedByOpponent(p, team, boardState)) {
+                // console.log("Referee: isValidMove - true")
+                return true;
+            }
+            // Check if tile is not occupied
+            else if (!this.tileIsOccupied(p, boardState)) {
+                // console.log("Referee: isValidMove - true")
+                return true;
+            }
+        }
+        return false;
+    }
+    isValidRookMove(grabPos: Position, p: Position, team: TeamType, boardState: Piece[]) {
         return true;
     }
-    isValidKnightMove(px: number, py: number, x: number, y: number) {
-        return true;
-    }
-    isValidRookMove(px: number, py: number, x: number, y: number) {
-        return true;
-    }
-    isValidPawnMove(px: number, py: number, x: number, y: number, team: TeamType, boardState: Piece[]) {
+    isValidPawnMove(grabPos: Position, p: Position, team: TeamType, boardState: Piece[]) {
         const startingRow = team === TeamType.WHITE ? 1 : 6;
         const direction = team === TeamType.WHITE ? 1 : -1;
 
         // Check if pawn is moving forward two spaces
-        if (px === x && py === startingRow && y === py + 2 * direction) {
-            if (!this.tileIsOccupied(x, y, boardState) && !this.tileIsOccupied(x, y-direction, boardState)) {
+        if (grabPos.x === p.x && grabPos.y === startingRow && p.y === grabPos.y + 2 * direction) {
+            if (!this.tileIsOccupied(p, boardState) && !this.tileIsOccupied({x: p.x, y:(p.y-direction)}, boardState)) {
                 return true;
             }
-            else if ((px === x-1 || px === x+1) && y === py + direction) {
-                if (this.tileIsOccupied(x, y, boardState)) {
+            else if ((grabPos.x === p.x-1 || grabPos.x === p.x+1) && p.y === grabPos.y + direction) {
+                if (this.tileIsOccupied(p, boardState)) {
                     return true;
                 }
             }
         } // Check if pawn is moving forward one space
-        else if (px === x && y === py + direction) {
-            if (!this.tileIsOccupied(x, y, boardState)) {
+        else if (grabPos.x === p.x && p.y === grabPos.y + direction) {
+            if (!this.tileIsOccupied(p, boardState)) {
                 return true;
             }
         }
         // Check if pawn is capturing
-        else if ((px === x-1 || px === x+1) && y === py + direction) {
-            if (this.tileIsOccupiedByOpponent(x, y, team, boardState)) {
+        else if ((grabPos.x === p.x-1 || grabPos.x === p.x+1) && p.y === grabPos.y + direction) {
+            if (this.tileIsOccupiedByOpponent(p, team, boardState)) {
                 console.log("Referee: isValidMove - true")
                 return true;
             }
