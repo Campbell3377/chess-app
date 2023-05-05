@@ -66,5 +66,5 @@ export const initialBoardState: Piece[] = [
     {image: `assets/images/pawn_w.png`, position: {x: 4, y: 1}, type: PieceType.PAWN, team: TeamType.WHITE},
     {image: `assets/images/pawn_w.png`, position: {x: 5, y: 1}, type: PieceType.PAWN, team: TeamType.WHITE},
     {image: `assets/images/pawn_w.png`, position: {x: 6, y: 1}, type: PieceType.PAWN, team: TeamType.WHITE},
-    {image: `assets/images/pawn_w.png`, position: {x: 7, y: 1}, type: PieceType.PAWN, team: TeamType.WHITE}
+    {image: `assets/images/pawn_w.png`, position: {x: 7, y: 1}, type: PieceType.PAWN, team: TeamType.WHITE},
 ];

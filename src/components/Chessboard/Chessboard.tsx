@@ -8,6 +8,7 @@ export default function Chessboard() {
     const [grabPosition, setGrabPosition] = useState<Position>({ x: -1, y: -1 });
     const [activePiece, setActivePiece] = useState<HTMLDivElement | null>(null);
     const [pieces, setPieces] = useState<Piece[]>(initialBoardState); // [state, function]
+    const [turn, setTurn] = useState<TeamType>(TeamType.WHITE);
     const chessboardRef = useRef<HTMLDivElement>(null);
     const referee = new Referee();
 
@@ -92,7 +93,9 @@ export default function Chessboard() {
                     }, [] as Piece[]);
                     setPieces(newPieces);
                 }
-                else if (validMove) {
+                
+                else if (validMove && currentPiece.team === turn) {
+                    console.log(turn);
                     const newPieces = pieces.reduce((results, piece) => {
                         if (samePosition(piece.position, grabPosition)) {
                             piece.enPassant = Math.abs(grabPosition.y - y) === 2 && piece.type === PieceType.PAWN;
@@ -110,6 +113,7 @@ export default function Chessboard() {
                     }, [] as Piece[]);
 
                     setPieces(newPieces);
+                    setTurn(turn === TeamType.WHITE ? TeamType.BLACK : TeamType.WHITE);
                 }
                 else {
                     activePiece.style.removeProperty('position');
@@ -117,8 +121,8 @@ export default function Chessboard() {
                     activePiece.style.removeProperty('top');
                 }  
             }
-
             setActivePiece(null);
+            
         }
     }
 
