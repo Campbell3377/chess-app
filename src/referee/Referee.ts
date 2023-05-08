@@ -54,13 +54,167 @@ export default class Referee {
             case PieceType.QUEEN:
                 return this.isValidQueenMove(grabPos, p, team, boardState);
             case PieceType.KING:
-                return this.isValidKingMove(grabPos, p);
+                return this.isValidKingMove(grabPos, p, team, boardState);
             default:
         }
         return true;
     }
-    isValidKingMove(grabPos: Position, p: Position) {
-        return true;
+    isValidKingMove(grabPos: Position, p: Position, team: TeamType, boardState: Piece[]) {
+        // Check if king is moving horizontally
+        if (grabPos.y === p.y) {
+            // Check if king is moving to the right
+            if (grabPos.x < p.x) {
+                for (let i = 1; i < Math.abs(grabPos.x - p.x)+1; i++) {
+                    if (this.tileIsOccupied({x: grabPos.x + i, y: grabPos.y}, boardState)) {
+                        //check if king is capturing
+                        console.log('checking if king is capturing')
+                        if( this.tileIsOccupiedByOpponent({x: grabPos.x + i, y: grabPos.y}, team, boardState)) {
+                            console.log('capturing')
+                            return true;
+                        }
+                        else {
+                            console.log('blocked')
+                            return false;
+                        }
+                    }
+                }
+                // return true;
+            }
+            // Check if king is moving to the left
+            else if (grabPos.x > p.x) {
+                for (let i = 1; i < Math.abs(grabPos.x - p.x)+1; i++) {
+                    if (this.tileIsOccupied({x: grabPos.x - i, y: grabPos.y}, boardState)) {
+                        //check if king is capturing
+                        console.log('checking if king is capturing')
+                        if( this.tileIsOccupiedByOpponent({x: grabPos.x - i, y: grabPos.y}, team, boardState)) {
+                            console.log('capturing')
+                            return true;
+                        }
+                        else {
+                            console.log('blocked')
+                            return false;
+                        }
+                    }
+                }
+                // return true;
+            }
+        }
+        // Check if king is moving vertically
+        else if (grabPos.x === p.x) {
+            // Check if king is moving up
+            if (grabPos.y < p.y) {
+                for (let i = 1; i < Math.abs(grabPos.y - p.y)+1; i++) {
+                    if (this.tileIsOccupied({x: grabPos.x, y: grabPos.y + i}, boardState)) {
+                        //check if king is capturing
+                        console.log('checking if king is capturing')
+                        if( this.tileIsOccupiedByOpponent({x: grabPos.x, y: grabPos.y + i}, team, boardState)) {
+                            console.log('capturing')
+                            return true;
+                        }
+                        else {
+                            console.log('blocked')
+                            return false;
+                        }
+                    }
+                }
+                // return true;
+            }
+            // Check if king is moving down
+            else if (grabPos.y > p.y) {
+                for (let i = 1; i < Math.abs(grabPos.y - p.y)+1; i++) {
+                    if (this.tileIsOccupied({x: grabPos.x, y: grabPos.y - i}, boardState)) {
+                        //check if king is capturing
+                        console.log('checking if king is capturing')
+                        if( this.tileIsOccupiedByOpponent({x: grabPos.x, y: grabPos.y - i}, team, boardState)) {
+                            console.log('capturing')
+                            return true;
+                        }
+                        else {
+                            console.log('blocked')
+                            return false;
+                        }
+                    }
+                }
+                // return true;
+            }
+        }
+        // Check if king is moving diagonally
+        else if (Math.abs(grabPos.x - p.x) === Math.abs(grabPos.y - p.y)) {
+            // Check if king is moving up and to the right
+            if (grabPos.x < p.x && grabPos.y < p.y) {
+                for (let i = 1; i < Math.abs(grabPos.x - p.x)+1; i++) {
+                    if (this.tileIsOccupied({x: grabPos.x + i, y: grabPos.y + i}, boardState)) {
+                        //check if king is capturing
+                        console.log('checking if king is capturing')
+                        if( this.tileIsOccupiedByOpponent({x: grabPos.x + i, y: grabPos.y + i}, team, boardState)) {
+                            console.log('capturing')
+                            return true;
+                        }
+                        else {
+                            console.log('blocked')
+                            return false;
+                        }
+                    }
+                }
+                // return true;
+            }
+            // Check if king is moving up and to the left
+            else if (grabPos.x > p.x && grabPos.y < p.y) {
+                for (let i = 1; i < Math.abs(grabPos.x - p.x)+1; i++) {
+                    if (this.tileIsOccupied({x: grabPos.x - i, y: grabPos.y + i}, boardState)) {
+                        //check if king is capturing
+                        console.log('checking if king is capturing')
+                        if( this.tileIsOccupiedByOpponent({x: grabPos.x - i, y: grabPos.y + i}, team, boardState)) {
+                            console.log('capturing')
+                            return true;
+                        }
+                        else {
+                            console.log('blocked')
+                            return false;
+                        }
+                    }
+                }
+                // return true;
+            }
+            // Check if king is moving down and to the right
+            else if (grabPos.x < p.x && grabPos.y > p.y) {
+                for (let i = 1; i < Math.abs(grabPos.x - p.x)+1; i++) {
+                    if (this.tileIsOccupied({x: grabPos.x + i, y: grabPos.y - i}, boardState)) {
+                        //check if king is capturing
+                        console.log('checking if king is capturing')
+                        if( this.tileIsOccupiedByOpponent({x: grabPos.x + i, y: grabPos.y - i}, team, boardState)) {
+                            console.log('capturing')
+                            return true;
+                        }
+                        else {
+                            console.log('blocked')
+                            return false;
+                        }
+                    }
+                }
+                // return true;
+            }
+            // Check if king is moving down and to the left
+            else if (grabPos.x > p.x && grabPos.y > p.y) {
+                for (let i = 1; i < Math.abs(grabPos.x - p.x)+1; i++) {
+                    if (this.tileIsOccupied({x: grabPos.x - i, y: grabPos.y - i}, boardState)) {
+                        //check if king is capturing
+                        console.log('checking if king is capturing')
+                        if( this.tileIsOccupiedByOpponent({x: grabPos.x - i, y: grabPos.y - i}, team, boardState)) {
+                            console.log('capturing')
+                            return true;
+                        }
+                        else {
+                            console.log('blocked')
+                            return false;
+                        }
+                    }
+                }
+                // return true;
+            }
+        }
+        return false;
+        // return true;
     }
     isValidQueenMove(grabPos: Position, p: Position, team: TeamType, boardState: Piece[]) {
         // Check if queen is moving horizontally
