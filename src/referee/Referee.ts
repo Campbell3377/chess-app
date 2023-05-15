@@ -201,11 +201,11 @@ export default class Referee {
                         //check if king is capturing
                         console.log('checking if king is capturing')
                         if( this.tileIsOccupiedByOpponent({x: grabPos.x - i, y: grabPos.y - i}, team, boardState)) {
-                            console.log('capturing')
+                            // console.log('capturing')
                             return true;
                         }
                         else {
-                            console.log('blocked')
+                            // console.log('blocked')
                             return false;
                         }
                     }
@@ -226,11 +226,11 @@ export default class Referee {
                         //check if queen is capturing
                         console.log('checking if queen is capturing')
                         if( this.tileIsOccupiedByOpponent({x: grabPos.x + i, y: grabPos.y}, team, boardState)) {
-                            console.log('capturing')
+                            // console.log('capturing')
                             return true;
                         }
                         else {
-                            console.log('blocked')
+                            // console.log('blocked')
                             return false;
                         }
                     }
